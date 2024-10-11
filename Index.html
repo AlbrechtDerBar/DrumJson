@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="script.js"></script>
+    <title>Taiko Jsonification</title>
+</head>
+<body>
+    <label for="id">ID:</label>
+    <input type="number" name="id" id="id" value="1">
+    <br>
+    <label for="order">Order:</label>
+    <input type="number" name="order" id="order" value="1">
+    <br>
+    <input type="file" name="TJAFile" id="inputFile">
+    <pre id="output"></pre>
+    <textarea id="outputJson"></textarea>
+    <script type="text/javascript">
+        document.getElementById('inputFile').addEventListener('change', function() {
+        let id = document.getElementById("id");
+        let order = document.getElementById("order");
+        let fr = new FileReader();
+        
+        let file_type = this.files[0].name.substr(this.files[0].name.indexOf(".")+1);
+        
+        fr.onload = function() {
+            document.getElementById('output').textContent = removeFrills(fr.result);
+            var tja = new TJA(removeFrills(fr.result).split("\r\n"), id.value, order.value, file_type);
+
+            let output = {
+                "title_lang": {
+                    "ja": tja.titleJA ?? null,
+                    "en": tja.titleEN ?? null,
+                    "cn": tja.titleCN ?? null,
+                    "tw": tja.titleTW ?? null,
+                    "ko": tja.titleKO ?? null,
+                },
+                "subtitle_lang": {
+                    "ja": tja.subtitleJA ?? null,
+                    "en": tja.subtitleEN ?? null,
+                    "cn": tja.subtitleCN ?? null,
+                    "tw": tja.subtitleTW ?? null,
+                    "ko": tja.subtitleKO ?? null,
+                },
+                ...tja.courses,
+                "enabled": tja.enabled ?? null,
+                "title": tja.title ?? null,
+                "subtitle": tja.subtitle ?? null,
+                "category_id": tja.category_id ?? null,
+                "type": tja.type ?? null,
+                "music_type": tja.music_type ?? null,
+                "offset": tja.offset ?? null,
+                "skin_id": tja.skin_id ?? null,
+                "preview": tja.preview ?? null,
+                "volume": tja.volume ?? null,
+                "maker_id": tja.maker_id ?? null,
+                "lyrics": tja.lyrics ?? null,
+                "hash": tja.hash ?? null,
+                "id": tja.id ?? null,
+                "order": tja.order ?? null
+            }
+
+            document.getElementById('outputJson').textContent = JSON.stringify(output);
+        }
+        
+        fr.readAsText(this.files[0]);
+
+        console.log(this.files[0]);
+
+        id.value = parseInt(id.value) + 1;
+        order.value = parseInt(order.value) + 1;
+    })
+
+    function removeFrills(text) {
+        
+        while(true) {
+            if(text.indexOf("#START") == -1 || text.indexOf("#END") == -1) {
+                break;
+            }
+            let start = text.indexOf("#START");
+            let end = text.indexOf("#END")+4;
+            
+            text = text.substring(0, start) + text.substring(end);
+        }
+        
+        while(true) {
+            if(text.indexOf("\r\n\r\n") == -1) {
+                break;
+            }
+            text = text.replace("\r\n\r\n", "\r\n");
+        }
+
+
+
+        return text;
+    }
+
+    class TJA {
+        constructor(items, id, order, fileType) {
+            console.log(items.findIndex((e) => e.includes("COURSE:Ura")))
+            this.enabled = true;
+            this.title = items.find((e) => e.includes("TITLE:"))?.replace("TITLE:", "");
+            this.titleJA = items.find((e) => e.includes("TITLEJA:"))?.replace("TITLEJA:", "");
+            this.titleEN = items.find((e) => e.includes("TITLEEN:"))?.replace("TITLEEN:", "");
+            this.titleCN = items.find((e) => e.includes("TITLECN:"))?.replace("TITLECN:", "");
+            this.titleTW = items.find((e) => e.includes("TITLETW:"))?.replace("TITLETW:", "");
+            this.titleKO = items.find((e) => e.includes("TITLEKO:"))?.replace("TITLEKO:", "");
+
+            this.subtitle = items.find((e) => e.includes("SUBTITLE:"))?.replace("SUBTITLE:", "");
+                if((this.subtitle?.[0] == "-" && this.subtitle?.[1] == "-")|| (this.subtitle?.[0] == "+" && this.subtitle?.[1] == "+")) {
+                    this.subtitle = this.subtitle.substring(2);
+                }
+
+            this.subtitleJA = items.find((e) => e.includes("SUBTITLEJA:"))?.replace("SUBTITLEJA:", "");
+                if((this.subtitleJA?.[0] == "-" && this.subtitleJA?.[1] == "-")|| (this.subtitleJA?.[0] == "+" && this.subtitleJA?.[1] == "+")) {
+                    this.subtitleJA = this.subtitleJA.substring(2);
+                }
+
+            this.subtitleEN = items.find((e) => e.includes("SUBTITLEEN:"))?.replace("SUBTITLEEN:", "");
+                if((this.subtitleEN?.[0] == "-" && this.subtitleEN?.[1] == "-")|| (this.subtitleEN?.[0] == "+" && this.subtitleEN?.[1] == "+")) {
+                    this.subtitleEN = this.subtitleEN.substring(2);
+                }
+
+            this.subtitleCN = items.find((e) => e.includes("SUBTITLECN:"))?.replace("SUBTITLECN:", "");
+                if((this.subtitleCN?.[0] == "-" && this.subtitleCN?.[1] == "-")|| (this.subtitleCN?.[0] == "+" && this.subtitleCN?.[1] == "+")) {
+                    this.subtitleCN = this.subtitleCN.substring(2);
+                }
+
+            this.subtitleTW = items.find((e) => e.includes("SUBTITLETW:"))?.replace("SUBTITLETW:", "");
+                if((this.subtitleTW?.[0] == "-" && this.subtitleTW?.[1] == "-")|| (this.subtitleTW?.[0] == "+" && this.subtitleTW?.[1] == "+")) {
+                    this.subtitleTW = this.subtitleTW.substring(2);
+                }
+
+            this.subtitleKO = items.find((e) => e.includes("SUBTITLEKO:"))?.replace("SUBTITLEKO:", "");
+                if((this.subtitleKO?.[0] == "-" && this.subtitleKO?.[1] == "-")|| (this.subtitleKO?.[0] == "+" && this.subtitleKO?.[1] == "+")) {
+                    this.subtitleKO = this.subtitleKO.substring(2);
+                }
+
+            this.category_id = category[items.find((e) => e.includes("GENRE:"))?.replace("GENRE:", "")];
+            this.type = fileType;
+            
+            this.music_type = items.find((e) => e.includes("WAVE:"))?.replace("WAVE:", "");
+            this.music_type = this.music_type.substr(this.music_type.indexOf(".")+1);
+
+            this.offset = parseFloat(items.find((e) => e.includes("OFFSET:"))?.replace("OFFSET:", ""));
+            this.offset = this.offset != NaN ? this.offset : null;
+
+            this.skin_id = "skin_id";
+
+            this.preview = parseFloat(items.find((e) => e.includes("DEMOSTART:"))?.replace("DEMOSTART:", ""));
+            this.preview = this.preview != NaN ? this.preview : null;
+
+            this.volume = parseFloat(items.find((e) => e.includes("SONGVOL:"))?.replace("SONGVOL:", ""));
+            this.volume = this.volume != NaN ? this.volume : null;
+
+            this.maker_id = items.find((e) => e.includes("MAKER:"))?.replace("MAKER:", "");
+            this.lyrics = items.find((e) => e.includes("LYRICS:"))?.replace("LYRICS:", "");
+            this.hash = "";
+            this.id = id;
+            this.order = order;
+            this.courses = {
+                "easy": {
+                    "stars": items[items.findIndex((e) => e.includes("COURSE:Easy"))+1].replace("LEVEL:", ""),
+                    "branch": false
+                },
+                "normal": {
+                    "stars": items[items.findIndex((e) => e.includes("COURSE:Normal"))+1].replace("LEVEL:", ""),
+                    "branch": false
+                },
+                "hard": {
+                    "stars": items[items.findIndex((e) => e.includes("COURSE:Hard"))+1].replace("LEVEL:", ""),
+                    "branch": false
+                },
+                "oni": {
+                    "stars": items[items.findIndex((e) => e.includes("COURSE:Oni"))+1].replace("LEVEL:", ""),
+                    "branch": false
+                },
+                "ura": {
+                    "stars": items[items.findIndex((e) => e.includes("COURSE:Ura"))+1].replace("LEVEL:", ""),
+                    "branch": false
+                },
+            }
+
+            this.courses.easy = this.courses.easy.stars > 0 ? this.courses.easy : null
+            this.courses.normal = this.courses.normal.stars > 0 ? this.courses.normal : null
+            this.courses.hard = this.courses.hard.stars > 0 ? this.courses.hard : null
+            this.courses.oni = this.courses.oni.stars > 0 ? this.courses.oni : null
+            this.courses.ura = this.courses.ura.stars > 0 ? this.courses.ura : null
+        }
+    }
+
+    let category = {};
+    // Pop
+    category["Pop"] = 1;
+    category["J-POP"] = 1;
+    category["流行音乐"] = 1;
+    category["流行音樂"] = 1;
+    category["POP"] = 1;
+
+    //Anime
+    category["Anime"] = 2;
+    category["アニメ"] = 2;
+    category["卡通动画音乐"] = 2;
+    category["卡通動畫音樂"] = 2;
+    category["애니메이션"] = 2;
+
+    //Vocaloid
+    category["VOCALOID™ Music"] = 3;
+    category["ボーカロイド™曲"] = 3;
+    category["ボーカロイド"] = 3;
+    category["VOCALOID"] = 3;
+    category["ボーカロイド曲"] = 3;
+    category["ボーカロイド"] = 3;
+    category["vocaloid music"] = 3;
+    category["vocaloid"] = 3;
+
+    //Variety
+    category["Variety"] = 4;
+    category["バラエティ"] = 4;
+    category["综合音乐"] = 4;
+    category["綜合音樂"] = 4;
+    category["버라이어티"] = 4;
+    category["バラエティー"] = 4;
+    category["どうよう"] = 4;
+    category["童謡・民謡"] = 4;
+    category["children"] = 4;
+    category["children/folk"] = 4;
+    category["children-folk"] = 4;
+
+    //Classical
+    category["クラシック"] = 5;
+    category["Classical"] = 5;
+    category["古典音乐"] = 5;
+    category["古典音樂"] = 5;
+    category["클래식"] = 5;
+    category["クラッシック"] = 5;
+    category["classic"] = 5;
+
+    //Game Music
+    category["ゲームミュージック"] = 6;
+    category["Game Music"] = 6;
+    category["游戏音乐"] = 6;
+    category["遊戲音樂"] = 6;
+    category["게임"] = 6;
+
+    //NAMCO
+    category["ナムコオリジナル"] = 7;
+    category["NAMCO Original"] = 7;
+    category["NAMCO原创音乐"] = 7;
+    category["NAMCO"] = 7;
+    category["NAMCO原創音樂"] = 7;
+    category["남코 오리지널"] = 7;
+
+
+    </script>
+</body>
+</html>
