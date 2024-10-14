@@ -44,7 +44,7 @@
                     "tw": tja.subtitleTW ?? null,
                     "ko": tja.subtitleKO ?? null,
                 },
-                ...tja.courses,
+                "courses":{...tja.courses},
                 "enabled": tja.enabled ?? null,
                 "title": tja.title ?? null,
                 "subtitle": tja.subtitle ?? null,
@@ -52,14 +52,14 @@
                 "type": tja.type ?? null,
                 "music_type": tja.music_type ?? null,
                 "offset": tja.offset ?? null,
-                "skin_id": tja.skin_id ?? null,
+                "skin_id": tja.skin_id ?? false,
                 "preview": tja.preview ?? null,
                 "volume": tja.volume ?? null,
                 "maker_id": tja.maker_id ?? null,
-                "lyrics": tja.lyrics ?? null,
+                "lyrics": tja.lyrics ?? false,
                 "hash": tja.hash ?? null,
-                "id": tja.id ?? null,
-                "order": tja.order ?? null
+                "id": parseInt(tja.id) ?? null,
+                "order": parseInt(tja.order) ?? null
             }
 
             document.getElementById('outputJson').textContent = JSON.stringify(output);
@@ -147,7 +147,7 @@
             this.offset = parseFloat(items.find((e) => e.includes("OFFSET:"))?.replace("OFFSET:", ""));
             this.offset = this.offset != NaN ? this.offset : null;
 
-            this.skin_id = "skin_id";
+            this.skin_id = false;
 
             this.preview = parseFloat(items.find((e) => e.includes("DEMOSTART:"))?.replace("DEMOSTART:", ""));
             this.preview = this.preview != NaN ? this.preview : null;
@@ -162,23 +162,23 @@
             this.order = order;
             this.courses = {
                 "easy": {
-                    "stars": items[items.findIndex((e) => e.includes("COURSE:Easy"))+1].replace("LEVEL:", ""),
+                    "stars": parseInt(items[items.findIndex((e) => e.includes("COURSE:Easy"))+1].replace("LEVEL:", "")),
                     "branch": false
                 },
                 "normal": {
-                    "stars": items[items.findIndex((e) => e.includes("COURSE:Normal"))+1].replace("LEVEL:", ""),
+                    "stars": parseInt(items[items.findIndex((e) => e.includes("COURSE:Normal"))+1].replace("LEVEL:", "")),
                     "branch": false
                 },
                 "hard": {
-                    "stars": items[items.findIndex((e) => e.includes("COURSE:Hard"))+1].replace("LEVEL:", ""),
+                    "stars": parseInt(items[items.findIndex((e) => e.includes("COURSE:Hard"))+1].replace("LEVEL:", "")),
                     "branch": false
                 },
                 "oni": {
-                    "stars": items[items.findIndex((e) => e.includes("COURSE:Oni"))+1].replace("LEVEL:", ""),
+                    "stars": parseInt(items[items.findIndex((e) => e.includes("COURSE:Oni"))+1].replace("LEVEL:", "")),
                     "branch": false
                 },
                 "ura": {
-                    "stars": items[items.findIndex((e) => e.includes("COURSE:Ura"))+1].replace("LEVEL:", ""),
+                    "stars": parseInt(items[items.findIndex((e) => e.includes("COURSE:Ura"))+1].replace("LEVEL:", "")),
                     "branch": false
                 },
             }
